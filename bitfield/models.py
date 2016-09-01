@@ -6,7 +6,7 @@ from django.db.models import signals
 from django.db.models.fields import Field, BigIntegerField
 
 from bitfield.forms import BitFormField
-from bitfield.query import BitQueryLookupWrapper
+from bitfield.query import BitQueryLookupWrapper, BitQueryLookupWrapperXor
 from bitfield.types import BitHandler, Bit
 
 # Count binary capacity. Truncate "0b" prefix from binary form.
@@ -191,6 +191,7 @@ class BitField(BigIntegerField):
 
 try:
     BitField.register_lookup(BitQueryLookupWrapper)
+    BitField.register_lookup(BitQueryLookupWrapperXor)
 except AttributeError:
     pass
 

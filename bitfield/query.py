@@ -20,19 +20,38 @@ class BitQueryLookupWrapper(object):
         return ("(%s.%s & %d)" % (qn(self.table_alias), qn(self.column), self.bit.mask),
                 [])
 
+class BitQueryLookupWrapperXor(object):
+    pass
+
 try:
     # Django 1.7+
     from django.db.models.lookups import Exact
 
     class BitQueryLookupWrapper(Exact):  # NOQA
         def process_lhs(self, qn, connection, lhs=None):
-            lhs_sql, params = super(BitQueryLookupWrapper, self).process_lhs(
+            lhs_sql, params = super().process_lhs(
                 qn, connection, lhs)
             if self.rhs:
                 lhs_sql = lhs_sql + ' & %s'
             else:
                 lhs_sql = lhs_sql + ' | %s'
             params.extend(self.process_rhs(qn, connection)[1])
+            return lhs_sql, params
+
+
+    class BitQueryLookupWrapperXor(Exact):  # NOQA
+        lookup_name = 'xor'
+
+        def get_rhs_op(self, connection, rhs):
+            return '!= 0'
+
+        def process_lhs(self, qn, connection, lhs=None):
+            lhs_sql, params = super().process_lhs(
+                qn, connection, lhs)
+            if self.rhs:
+                lhs_sql = lhs_sql + ' & %s'
+            else:
+                lhs_sql = lhs_sql + ' | %s'
             return lhs_sql, params
 
 except ImportError:
